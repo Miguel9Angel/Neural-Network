@@ -12,8 +12,14 @@ class Network():
     def sigmoid(z):
         return 1 / (1+math.exp(z))
     
-    def GD(x_train_data, y_train_data, epochs, batch,lr):
-        
+    def GD(training_data, epochs, batch_zise,lr):
+        n = len(training_data)
         for i in epochs:
-            iter = int(x_train_data/batch)
-            for j in iter:
+            batch_data = [
+                training_data[d:d+batch_zise]
+                for d in range(0, n, batch_zise)
+            ]
+            random.shuffle(training_data)
+            for data in batch_data:
+                a = data[0]
+                z = 
