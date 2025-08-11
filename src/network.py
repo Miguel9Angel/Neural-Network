@@ -2,6 +2,8 @@ import numpy as np
 import math
 import random
 import os
+from keras.datasets import mnist
+
 class Network():
     def __init__(self, layers, seed=42):
         np.random.seed(seed)
@@ -35,6 +37,7 @@ class Network():
         activations = [X]
         a = X
         for W, b in zip(self.weights, self.biases):
+            
             z = np.dot(a, W)+b
             a = self.sigmoid(z)
             activations.append(a)
@@ -60,36 +63,68 @@ class Network():
             self.weights[i] -= (lr/batch_size)*grads_w[i]
             self.biases[i] -= (lr/batch_size)*grads_b[i]
         
-    def predict(self, X):
-        X = self._ensure_2d(X)
-        return self.feedforward(X)[-1]
-
-    def predict(self, test_data, threshold=0.5):
-        X, y = zip(*test_data)
+    def predict(self, X, y=None):
+        if isinstance(X, list) and isinstance(X[0], tuple):
+            X = np.vstack([xi for xi, _ in X])
         activations = self.feedforward(X)
-        return y, activations[-1]
+        return activations[-1]
 
     def evaluate(self, test_data, threshold=0.5):
         X = np.vstack([x for x,_ in test_data])
         y = np.vstack([y for _,y in test_data])
         preds = self.predict(X)
-        preds_bin = (preds >= threshold).astype(int)
-        acc = np.mean(preds_bin == y)
+        
+        if preds.shape[1] == 1:
+            preds_bin = (preds >= threshold).astype(int)
+            acc = np.mean(preds_bin == y)
+        else:
+            y_true = np.argmax(y, axis=1)
+            y_pred = np.argmax(preds, axis=1)
+            acc = np.mean(y_pred == y_true)
         return acc, preds
-    
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ruta_archivo = os.path.join(BASE_DIR, "../data/xor_test.csv")
-data = np.loadtxt(ruta_archivo, delimiter=',', dtype=int)
-X = data[:, :-1]
-y = data[:, -1] 
 
-dataset = [(X[i], [y[i]]) for i in range(len(X))]
 
-train_size = int(len(dataset) * 0.8)
-train_data = dataset[:train_size]
-test_data = dataset[train_size:]
+def testing_network(datasets):
+    for dataset_name in datasets:
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        ruta_archivo = os.path.join(BASE_DIR, "../data/"+dataset_name)
+        data = np.loadtxt(ruta_archivo, delimiter=',', dtype=int)
+        X = data[:, :-1]
+        y = data[:, -1] 
 
-network1 = Network([2,3,1])
-network1.SGD(train_data, 10, 25, 0.25)
-output = network1.evaluate(test_data)
-print(output)
+        dataset = [(X[i], [y[i]]) for i in range(len(X))]
+
+        train_size = int(len(dataset) * 0.8)
+        train_data = dataset[:train_size]
+        test_data = dataset[train_size:]
+
+        network1 = Network([2, 30, 1])
+        network1.SGD(train_data, 10, 10, 0.5)
+        accuracy, prediction = network1.evaluate(test_data)
+        print('accuracy '+dataset_name )
+        print(accuracy)
+
+datasets = ['and_test.csv', 'or_test.csv', 'xor_test.csv']
+# testing_network(datasets)
+
+
+# ------------- training the mnist dataset -------------------
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
+X_train = X_train.reshape(-1, 28*28) / 255
+X_test = X_test.reshape(-1, 28*28) / 255
+
+def one_hot(y, n_classes=10):
+    oh = np.zeros((y.size, n_classes))
+    oh[np.arange(y.size), y] = 1
+    return oh
+
+y_train_oh = one_hot(y_train)
+y_test_oh = one_hot(y_test)
+training_data = list(zip(X_train, y_train_oh))
+test_data = list(zip(X_test, y_test_oh))
+
+net_mnist =  Network([784, 70, 70, 10])
+net_mnist.SGD(training_data, epochs=20, batch_size=25, lr=0.3)
+accuracy, prediction = net_mnist.evaluate(test_data)
+print('MNIST model Accuracy')
+print(accuracy)
