@@ -2,7 +2,6 @@ import numpy as np
 import math
 import random
 import os
-from keras.datasets import mnist
 
 class Network():
     def __init__(self, layers, seed=42, cost='quadratic'):
@@ -17,10 +16,23 @@ class Network():
     
     def dev_sig(self, a):
         return a*(1-a)
-
-    def output_error(self, a, y):
-        return (a - y) * self.dev_sig(a)
     
+    def quadratuc_cost(self, y_true, y_pred, derivate=False):
+        if derivate:
+            delta = (y_pred - y_true) * self.dev_sig(y_pred)
+            return delta
+        else:
+            m = y_true.shape[0]
+            cost = (1/(2*m))*np.sum((y_pred - y_true)**2)
+            return cost
+    
+    def cross_entropy_cost(self, y_true, y_pred, derivate=False):
+        if derivate:
+            return y_pred-y_true
+        else:
+            delta = np.sum(np.nan_to_num(-y_true*np.log(y_pred)-(1-y_true)*np.log(1-y_pred)))
+            return delta
+
     def SGD(self, training_data, epochs=10, batch_size=32, lr=0.1):
         n = len(training_data)
         for _ in range(epochs):
@@ -38,7 +50,6 @@ class Network():
         activations = [X]
         a = X
         for W, b in zip(self.weights, self.biases):
-            
             z = np.dot(a, W)+b
             a = self.sigmoid(z)
             activations.append(a)
@@ -51,9 +62,9 @@ class Network():
         grads_b = [np.zeros_like(b) for b in self.biases]
         
         if cost == 'quadratic':
-            delta = (activations[-1]-y)*self.dev_sig(activations[-1])
+            delta = self.quadratuc_cost(y, activations[-1], derivate=True)
         elif cost == 'cross entropy':
-            delta = (activations[-1]-y)
+            delta = self.cross_entropy_cost(y, activations[-1], derivate=True)
         
         grads_w[-1] = np.dot(activations[-2].T, delta)
         grads_b[-1] = np.sum(delta, axis=0, keepdims=True)
@@ -88,49 +99,3 @@ class Network():
             y_pred = np.argmax(preds, axis=1)
             acc = np.mean(y_pred == y_true)
         return acc, preds
-
-
-def testing_network(datasets):
-    for dataset_name in datasets:
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-        ruta_archivo = os.path.join(BASE_DIR, "../data/"+dataset_name)
-        data = np.loadtxt(ruta_archivo, delimiter=',', dtype=int)
-        X = data[:, :-1]
-        y = data[:, -1] 
-
-        dataset = [(X[i], [y[i]]) for i in range(len(X))]
-
-        train_size = int(len(dataset) * 0.8)
-        train_data = dataset[:train_size]
-        test_data = dataset[train_size:]
-
-        network1 = Network([2, 30, 1])
-        network1.SGD(train_data, 10, 10, 0.5)
-        accuracy, prediction = network1.evaluate(test_data)
-        print('accuracy '+dataset_name )
-        print(accuracy)
-
-datasets = ['and_test.csv', 'or_test.csv', 'xor_test.csv']
-# testing_network(datasets)
-
-
-# ------------- training the mnist dataset -------------------
-(X_train, y_train), (X_test, y_test) = mnist.load_data()
-X_train = X_train.reshape(-1, 28*28) / 255
-X_test = X_test.reshape(-1, 28*28) / 255
-
-def one_hot(y, n_classes=10):
-    oh = np.zeros((y.size, n_classes))
-    oh[np.arange(y.size), y] = 1
-    return oh
-
-y_train_oh = one_hot(y_train)
-y_test_oh = one_hot(y_test)
-training_data = list(zip(X_train, y_train_oh))
-test_data = list(zip(X_test, y_test_oh))
-
-net_mnist =  Network([784, 70, 70, 10], cost='cross entropy')
-net_mnist.SGD(training_data, epochs=20, batch_size=25, lr=0.3)
-accuracy, prediction = net_mnist.evaluate(test_data)
-print('MNIST model Accuracy')
-print(accuracy)
