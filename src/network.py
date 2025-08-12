@@ -5,11 +5,12 @@ import os
 from keras.datasets import mnist
 
 class Network():
-    def __init__(self, layers, seed=42):
+    def __init__(self, layers, seed=42, cost='quadratic'):
         np.random.seed(seed)
         self.layers = layers
         self.weights = [np.random.randn(layers[i], layers[i+1]) for i in range(len(layers)-1)]
         self.biases = [np.zeros((1, layers[i+1])) for i in range(len(layers)-1)]
+        self.cost = cost
 
     def sigmoid(self, z):
         return 1 / (1+np.exp(-z))
@@ -29,7 +30,7 @@ class Network():
                 X_batch = np.vstack([x for x, _ in batch])
                 y_batch = np.vstack([y for _, y in batch])
                 activations = self.feedforward(X_batch)
-                grads_w, grads_b = self.backpropagation(activations, y_batch)
+                grads_w, grads_b = self.backpropagation(activations, y_batch, self.cost)
                 self.update_w_b(grads_w, grads_b, lr, X_batch.shape[0])
             
     
@@ -43,15 +44,20 @@ class Network():
             activations.append(a)
         return activations
     
-    def backpropagation(self, activations, y):
+    def backpropagation(self, activations, y, cost):
         m = y.shape[0]
         n = len(self.weights)
         grads_w = [np.zeros_like(W) for W in self.weights]
         grads_b = [np.zeros_like(b) for b in self.biases]
-        delta = (activations[-1]-y)*self.dev_sig(activations[-1])
+        
+        if cost == 'quadratic':
+            delta = (activations[-1]-y)*self.dev_sig(activations[-1])
+        elif cost == 'cross entropy':
+            delta = (activations[-1]-y)
+        
         grads_w[-1] = np.dot(activations[-2].T, delta)
         grads_b[-1] = np.sum(delta, axis=0, keepdims=True)
-
+        
         for idx in range(n-2, -1,-1):
             delta = np.dot(delta, self.weights[idx+1].T)*self.dev_sig(activations[idx+1])
             grads_w[idx] = np.dot(activations[idx].T, delta)
@@ -123,7 +129,7 @@ y_test_oh = one_hot(y_test)
 training_data = list(zip(X_train, y_train_oh))
 test_data = list(zip(X_test, y_test_oh))
 
-net_mnist =  Network([784, 70, 70, 10])
+net_mnist =  Network([784, 70, 70, 10], cost='cross entropy')
 net_mnist.SGD(training_data, epochs=20, batch_size=25, lr=0.3)
 accuracy, prediction = net_mnist.evaluate(test_data)
 print('MNIST model Accuracy')
