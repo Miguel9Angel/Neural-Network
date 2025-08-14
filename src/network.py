@@ -4,13 +4,14 @@ import random
 import os
 
 class Network():
-    def __init__(self, layers, seed=42, cost='quadratic'):
+    def __init__(self, layers, seed=42, cost='quadratic', lmbda=0):
         np.random.seed(seed)
         self.layers = layers
         self.weights = [np.random.randn(layers[i], layers[i+1]) for i in range(len(layers)-1)]
         self.biases = [np.zeros((1, layers[i+1])) for i in range(len(layers)-1)]
+        self.lmbda = lmbda
         if cost == 'quadratic':
-            self.cost = self.quadratuc_cost
+            self.cost = self.quadratic_cost
         elif cost == 'cross entropy':
             self.cost = self.cross_entropy_cost
 
@@ -47,7 +48,7 @@ class Network():
                 X_batch = np.vstack([x for x, _ in batch])
                 y_batch = np.vstack([y for _, y in batch])
                 activations = self.feedforward(X_batch)
-                grads_w, grads_b = self.backpropagation(activations, y_batch, self.cost)
+                grads_w, grads_b = self.backpropagation(activations, y_batch)
                 self.update_w_b(grads_w, grads_b, lr, X_batch.shape[0])
                 if return_training_cost:
                     cost = self.cost_function(activations, y_batch)
@@ -82,8 +83,9 @@ class Network():
         return grads_w, grads_b
 
     def update_w_b(self, grads_w, grads_b, lr, batch_size):
+        n = sum(W.size for W in self.weights)
         for i in range(len(self.weights)):
-            self.weights[i] -= (lr/batch_size)*grads_w[i]
+            self.weights[i] -= (1-(self.lmbda*lr/n))*self.weights[i]-(lr/batch_size)*grads_w[i]
             self.biases[i] -= (lr/batch_size)*grads_b[i]
             
     def cost_function(activations, y):
