@@ -9,11 +9,13 @@ class Network():
         self.layers = layers
         self.weights = [np.random.randn(layers[i], layers[i+1]) for i in range(len(layers)-1)]
         self.biases = [np.zeros((1, layers[i+1])) for i in range(len(layers)-1)]
-        self.lmbda = lmbda
+        self.lmbda = float(lmbda)
         if cost == 'quadratic':
             self.cost = self.quadratic_cost
         elif cost == 'cross entropy':
             self.cost = self.cross_entropy_cost
+        else:
+            raise ValueError("cost debe ser 'quadratic' o 'cross_entropy'")
 
     def sigmoid(self, z):
         return 1 / (1+np.exp(-z))
@@ -23,19 +25,17 @@ class Network():
     
     def quadratic_cost(self, y_true, y_pred, derivate=False):
         if derivate:
-            delta = (y_pred - y_true) * self.dev_sig(y_pred)
-            return delta
+            return (y_pred - y_true) * self.dev_sig(y_pred)
         else:
             m = y_true.shape[0]
-            cost = (1/(2*m))*np.sum((y_pred - y_true)**2)
-            return cost
+            return (1/(2*m))*np.sum((y_pred - y_true)**2)
     
     def cross_entropy_cost(self, y_true, y_pred, derivate=False):
         if derivate:
             return y_pred-y_true
         else:
-            cost = np.sum(np.nan_to_num(-y_true*np.log(y_pred)-(1-y_true)*np.log(1-y_pred)))
-            return cost
+            m = y_true.shape[0]
+            return np.sum(np.nan_to_num(-y_true*np.log(y_pred)-(1-y_true)*np.log(1-y_pred)))/m
 
     def SGD(self, training_data, epochs=10, batch_size=32, lr=0.1, return_training_cost=False):
         n = len(training_data)
@@ -44,15 +44,18 @@ class Network():
             random.shuffle( training_data )
             batches = [ training_data [i:i+ batch_size ] for i in range(0, n, batch_size)]
             epoch_cost = []
+            
             for batch in batches:
                 X_batch = np.vstack([x for x, _ in batch])
                 y_batch = np.vstack([y for _, y in batch])
+
                 activations = self.feedforward(X_batch)
                 grads_w, grads_b = self.backpropagation(activations, y_batch)
                 self.update_w_b(grads_w, grads_b, lr, X_batch.shape[0])
+
                 if return_training_cost:
-                    cost = self.cost_function(activations, y_batch)
-                    epoch_cost.append(cost)
+                    epoch_cost.append(self.cost_function(activations, y_batch))
+            
             if return_training_cost:
                 all_training_costs.append(np.mean(epoch_cost) if epoch_cost else 0)
     
@@ -80,17 +83,25 @@ class Network():
             delta = np.dot(delta, self.weights[idx+1].T)*self.dev_sig(activations[idx+1])
             grads_w[idx] = np.dot(activations[idx].T, delta)
             grads_b[idx] = np.sum(delta, axis=0, keepdims=True)
+        if self.lmbda > 0:
+            total_params = sum(W.size for W in self.weights)
+            for i in range(len(grads_w)):
+                grads_w[i] += (self.lmbda / total_params) * self.weights[i]
         return grads_w, grads_b
 
     def update_w_b(self, grads_w, grads_b, lr, batch_size):
         n = sum(W.size for W in self.weights)
         for i in range(len(self.weights)):
-            self.weights[i] -= (1-(self.lmbda*lr/n))*self.weights[i]-(lr/batch_size)*grads_w[i]
+            self.weights[i] -= (lr/batch_size)*grads_w[i]
             self.biases[i] -= (lr/batch_size)*grads_b[i]
             
-    def cost_function(activations, y):
+    def cost_function(self, activations, y):
         y_pred = activations[-1]
-        cost = self.cost(y, y_pred, derivate=False)/len(y_pred)
+        cost = self.cost(y, y_pred, derivate=False)
+        if self.lmbda > 0:
+            total_params = sum(W.size for W in self.weights)
+            l2_penalty = (self.lmbda / (2 * total_params)) * sum(np.sum(W**2) for W in self.weights)
+            cost += l2_penalty
         return cost  
         
     def predict(self, X, y=None):
