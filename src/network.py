@@ -1,7 +1,5 @@
 import numpy as np
-import math
 import random
-import os
 
 class Network():
     def __init__(self, layers, seed=42, cost='quadratic', lmbda=0, initializer='', n_early_stop=0):
