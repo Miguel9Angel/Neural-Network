@@ -42,19 +42,25 @@ class Network():
         if derivate:
             return y_pred-y_true
         else:
-            m = y_true.shape[0]
-            return np.sum(np.nan_to_num(-y_true*np.log(y_pred)-(1-y_true)*np.log(1-y_pred)))/m
+            epsilon = 1e-15  
+            y_pred = np.clip(y_pred, epsilon, 1 - epsilon)
+            return -np.mean(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
 
-    def SGD(self, training_data, epochs=10, batch_size=32, lr=0.1, validation_data=None, return_training_cost=False):
+    def step_lr(self, epoch, lr):
+        return lr * 0.5 if epoch % 20 == 0 and epoch > 0 else lr
+
+    def SGD(self, training_data, epochs=10, batch_size=32, lr=0.1, validation_data=None, return_training_cost=False, step_lr = False):
         n = len(training_data)
         best_accuracy = 0
         counter_stopping = 0
         evaluation_cost, evaluation_accuracy = [], []
         training_cost, training_accuracy = [], []
-        for _ in range(epochs):
+        for epoch in range(epochs):
             random.shuffle( training_data )
             batches = [ training_data [i:i+ batch_size ] for i in range(0, n, batch_size)]
-            
+            if step_lr:
+                lr = self.step_lr(epoch, lr)
+
             for batch in batches:
                 X_batch = np.vstack([x for x, _ in batch])
                 y_batch = np.vstack([y for _, y in batch])
@@ -142,4 +148,4 @@ class Network():
             y_true = np.argmax(y, axis=1)
             y_pred = np.argmax(preds, axis=1)
             acc = np.mean(y_pred == y_true)
-        return cost, acc
+        return cost, acc 
