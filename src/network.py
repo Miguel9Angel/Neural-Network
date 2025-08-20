@@ -15,7 +15,7 @@ class Network():
         self.lmbda = float(lmbda)
             
         cost_functions = {
-            'quadratic': self.quadratic_cost,
+            'quadratic': self.quadratic_cost, 
             'cross_entropy': self.cross_entropy_cost
         }
 
@@ -47,7 +47,6 @@ class Network():
 
     def SGD(self, training_data, epochs=10, batch_size=32, lr=0.1, validation_data=None, return_training_cost=False):
         n = len(training_data)
-        all_training_costs = []
         best_accuracy = 0
         counter_stopping = 0
         evaluation_cost, evaluation_accuracy = [], []
@@ -55,7 +54,6 @@ class Network():
         for _ in range(epochs):
             random.shuffle( training_data )
             batches = [ training_data [i:i+ batch_size ] for i in range(0, n, batch_size)]
-            epoch_cost = []
             
             for batch in batches:
                 X_batch = np.vstack([x for x, _ in batch])
@@ -65,9 +63,6 @@ class Network():
                 grads_w, grads_b = self.backpropagation(activations, y_batch, X_batch.shape[0])
                 self.update_w_b(grads_w, grads_b, lr, X_batch.shape[0])
 
-                if return_training_cost:
-                    epoch_cost.append(self.cost_function(activations, y_batch))
-
             train_cost, train_accuracy = self.evaluate(training_data)  
             eval_cost, eval_accuracy = self.evaluate(validation_data)
             training_cost.append(train_cost)
@@ -75,9 +70,6 @@ class Network():
             evaluation_cost.append(eval_cost)
             evaluation_accuracy.append(eval_accuracy)
 
-            if return_training_cost:
-                all_training_costs.append(np.mean(epoch_cost) if epoch_cost else 0)
-            
             if self.n_early_stopping > 0 and validation_data:
                 if eval_accuracy > best_accuracy:
                     best_accuracy = eval_accuracy
@@ -123,8 +115,7 @@ class Network():
             self.weights[i] -= (lr/batch_size)*grads_w[i]
             self.biases[i] -= (lr/batch_size)*grads_b[i]
             
-    def cost_function(self, activations, y):
-        y_pred = activations[-1]
+    def cost_function(self, y_pred, y):
         cost = self.cost(y, y_pred, derivate=False)
         if self.lmbda > 0:
             total_params = sum(W.size for W in self.weights)
