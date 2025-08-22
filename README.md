@@ -1,18 +1,14 @@
-# 🏡 Predicción de precios de arriendo en Bogotá
+# 🦾🤖 TESTING NEURAL NETWORK AND HYPERPARAMETERS
 
 ![preview](./assets/aparments_by_price_bogota.png)
 
-Proyecto de ciencia de datos que busca predecir el precio de renta de un apartamento en la ciudad de Bogotá. Para ello, se extraen datos reales mediante técnicas de Web Scraping y se utilizan modelos de Machine Learning para predecir su valor.
-
-## 🔍 Problema
-
-Este análisis del precio de renta de apartamentos y cómo sus características influyen en este valor, es fundamental para optimizar el presupuesto de arriendo según las necesidades individuales. Para los arrendatarios (inquilinos), resulta crucial contar con una referencia clara de cuánto el mercado valora los inmuebles por sus comodidades y ubicación en la ciudad. Asimismo, para los arrendadores (propietarios), Esta estimación es clave para establecer un valor competitivo que evite tanto la subvaloración como el sobreprecio del inmueble frente al mercado.
+This porject goal is to make a general neural network with some of the most important configurations to understand the basic of functionality of a neural network. Test it with different data sets and track it's performance with differents hyperparameters
 
 ## 📊 Dataset
 
-- Fuente: [Finca Raíz (Web Scraping)](https://www.fincaraiz.com.co/)
-- Nº de registros: 8.566 apartamentos
-- Variables: longitude, latitude, stratum, bathrooms, constructed_area, house_age, bedrooms, parking, administration, floor, rent_price, facilities
+- Source: [mnist handwritten numbers] http://yann.lecun.com
+- Nº of records: 70.000 image numbers
+- Variables: pixels image, labels
 
 ## 🛠️ Técnicas usadas
 

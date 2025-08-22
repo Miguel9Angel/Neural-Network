@@ -7,6 +7,7 @@ class Network():
         self.layers = layers
         self.biases = [np.zeros((1, y)) for y in self.layers[1:]]
         self.n_early_stopping = n_early_stop
+
         if initializer=='Gaussian':
             self.weights = [np.random.randn(x, y)/np.sqrt(x) for x, y in zip(layers[:-1], layers[1:])]
         else:
@@ -30,7 +31,7 @@ class Network():
     
     def dev_sig(self, a):
         return a*(1-a)
-    
+
     def quadratic_cost(self, y_true, y_pred, derivate=False):
         if derivate:
             return (y_pred - y_true) * self.dev_sig(y_pred)
@@ -42,22 +43,27 @@ class Network():
         if derivate:
             return y_pred-y_true
         else:
+            #np.clip forces the y_pred to be greater than epsilon and less than (1-epsilon) to avoid inf values in np.log
             epsilon = 1e-15  
             y_pred = np.clip(y_pred, epsilon, 1 - epsilon)
             return -np.mean(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
 
+    #schedule learning rate, reduce the lr by  halft each 20 epochs 
     def step_lr(self, epoch, lr):
         return lr * 0.5 if epoch % 20 == 0 and epoch > 0 else lr
 
+    #Stocastic gradient descent
     def SGD(self, training_data, epochs=10, batch_size=32, lr=0.1, validation_data=None, return_training_cost=False, step_lr = False):
         n = len(training_data)
         best_accuracy = 0
         counter_stopping = 0
         evaluation_cost, evaluation_accuracy = [], []
         training_cost, training_accuracy = [], []
+        
         for epoch in range(epochs):
             random.shuffle( training_data )
             batches = [ training_data [i:i+ batch_size ] for i in range(0, n, batch_size)]
+            
             if step_lr:
                 lr = self.step_lr(epoch, lr)
 
@@ -86,6 +92,7 @@ class Network():
                 if counter_stopping >= self.n_early_stopping:
                     print("Early stopping: no improvement in {} epochs".format(self.n_early_stopping))
                     break
+
         return training_cost, training_accuracy, evaluation_cost, evaluation_accuracy
         
     def feedforward(self, X):
@@ -111,9 +118,11 @@ class Network():
             delta = np.dot(delta, self.weights[idx+1].T)*self.dev_sig(activations[idx+1])
             grads_w[idx] = np.dot(activations[idx].T, delta)
             grads_b[idx] = np.sum(delta, axis=0, keepdims=True)
+
         if self.lmbda > 0:
             for i in range(len(grads_w)):
                 grads_w[i] += (self.lmbda / batch_size) * self.weights[i]
+                
         return grads_w, grads_b
 
     def update_w_b(self, grads_w, grads_b, lr, batch_size):
