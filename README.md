@@ -52,6 +52,7 @@ pip install -r requirements.txt
 jupyter notebook notebooks/testing_models.ipynb
 
 ## 📁 Repository estructure
+```
 NEURAL-NETWORK/
 ├── assets/
 │   ├── AccuracyByCostFunction.png
@@ -79,7 +80,7 @@ NEURAL-NETWORK/
 ├── LICENSE
 ├── README.md
 └── requirements.txt
-
+```
 ## 📜 License
 
 This project is licensed under the [Licencia MIT](./LICENSE).  
