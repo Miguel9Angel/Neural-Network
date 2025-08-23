@@ -1,79 +1,96 @@
-# 🦾🤖 TESTING NEURAL NETWORK AND HYPERPARAMETERS
+# 🦾🤖 Creating a Neural Network from Scratch
 
-![preview](./assets/aparments_by_price_bogota.png)
+![preview](./assets/BestModelRandSearchCost_Accuracy.png)
 
 This porject goal is to make a general neural network with some of the most important configurations to understand the basic of functionality of a neural network. Test it with different data sets and track it's performance with differents hyperparameters
 
 ## 📊 Dataset
 
-- Source: [mnist handwritten numbers] http://yann.lecun.com
+- Source: [mnist handwritten numbers] (http://yann.lecun.com)
 - Nº of records: 70.000 image numbers
 - Variables: pixels image, labels
 
-## 🛠️ Técnicas usadas
+## 🛠️ Techniques Used
 
-- Web scraping con BeautifulSoup
 - Análisis exploratorio de datos (EDA)
-- Visualización de ubicación de propiedades en mapa con Folium
-- Identificación de localidades con geopandas
-- Selección de caracteristicas con Informacion Mutua (MI)
-- Regression Lineal, Lasso, RandomForest, XGBoost
-- Tunning de hiperparametros con GridSearchCV
+- Neural Network
+- Numpy matrix operations
+- Backpropagation
+- Regularization
+- Categorical cross-entropy
 
-## 📈 Resultados
+## 📈 Results
 
-- RMSE: 1614593.77 COP
-- MAE: 839132.70 COP
-- R²: 0.78
-- Variables más importantes: longitude, latitude, constructed_area, house age
+The best metrics achieved from mnist hand written numbers using random search were
+- Accuracy: 98.37%
+- Cost: 0.015
 
-## 🧠 Lecciones aprendidas
+The best metrics achieved from mnist fashion using random search were
+- Accuracy: 90%
+- Cost: 0.052
 
-Analizando las variables mas influyentes se encontro que las relacionadas o comodidades tanto interiores como exteriores no tiene influencia sobre el precio de arriendo de la propiedad. Y aspectos como la ubicación de la propiedad pueden elevar bastante el precio de la propiedad como es el caso de la localidad de Usaquen y Chapinero.
+## 🧠 Lessons Learn
 
-## 🚀 Cómo ejecutar este proyecto
+Understanding linear algebra is a crucial skill for implementing the operations between weights, input values, activations, and bias. These operations are essential for performing the correct feedforward, backpropagation, and weight updates in a neural network
 
-Sigue los siguientes pasos para ejecutar el proyecto en tu máquina local:
+The techniques applied to a neural network are vital for reducing overfitting and enhancing the model's performance. These methods imporve the network's ability to generalize, ensuring that it performs well not only on the training data but alse on new, unseen data.
 
-### 1️⃣ Clona el repositorio
+## 🚀 How to run this project
+
+Follow these steps to run the project on your local machine:
+
+### 1️⃣ Clone the repository
 ```bash
-git clone https://github.com/Miguel9Angel/home_price_bogota.git
-cd home_price_bogota
+git clone https://github.com/Miguel9Angel/Neural-Network.git
+cd Neural-Network
 ```
 
-### 2️⃣ Requisitos
+### 2️⃣ Requirements
 pip install -r requirements.txt
 
-### 3️⃣ Ejecuta el notebook
-jupyter notebook notebooks/eda_modelo_final.ipynb
+### 3️⃣ Run the notebook
+jupyter notebook notebooks/testing_models.ipynb
 
-## 📁 Estructura del repositorio
-HOME_PRICE_BOGOTA/
-├── assets/ # Imágenes y visualizaciones para el README
-│ └── aparments_by_price_bogota.png
+## 📁 Repository estructure
+NEURAL-NETWORK/
+├── assets/
+│   ├── AccuracyByCostFunction.png
+│   ├── AccuracyByInitializer.png
+│   ├── AccuracyByLambda.png
+│   ├── BestMnistFashionModel.png
+│   ├── BestModelRandSearchCost_Accuracy.png
+│   ├── Comparing_n.png
+│   ├── Costby_n.png
+│   ├── Mnist_fashion_firt_model.png
+│   └── TestingLearningRateSchedule.png
 │
-├── data/ # Datos en crudo y procesados
-│ ├── Real_State_Bogota.csv
-│ └── localidades_Bogota.json
+├── data/
+│   ├── and_test.csv
+│   ├── or_test.csv
+│   └── xor_test.csv
 │
-├── notebooks/ # Notebooks del análisis y scraping
-│ ├── apto_analisis_bogota.ipynb
-│ └── house_price_scraping_bogota.ipynb
+├── notebooks/
+│   └── testing_models.ipynb
 │
-├── requirements.txt # Dependencias del proyecto
-├── README.md # Documentación principal del repositorio
+├── src/
+│   ├── __pycache__/
+│   └── network.py
+│
+├── LICENSE
+├── README.md
+└── requirements.txt
 
-## 📜 Licencia
+## 📜 License
 
-Este proyecto está licenciado bajo la [Licencia MIT](./LICENSE).  
-Puedes usar, modificar y distribuir este código libremente dando el crédito correspondiente.
+This project is licensed under the [Licencia MIT](./LICENSE).  
+You are free to use, modify, and distribute this code, provided that proper credit is given.
 
 --------------------------------------------------------------------------------------
 
-## 🙋 Sobre mí
+## 🙋 About me
 
-Me llamo Miguel Angel Soler Otalora, soy ingeniero mecánico con formación en ciencia de datos e inteligencia artificial. Combino el pensamiento analítico y estructurado de la ingeniería con habilidades modernas de análisis de datos, visualización y modelado predictivo.
+My name is Miguel Angel Soler Otalora, a mechanical engineer with a background in data science and artificial intelligence. I combine the analytical and structured thinking of engineering with modern skills in data analysis, visualization, and predictive modeling.
 
-Este proyecto forma parte de mi portafolio para aplicar a roles como Data Analyst o Data Scientist, y refleja mi interés por aplicar el análisis de datos al mundo real.
+This project is part of my portfolio to apply for roles as a Data Analyst or Data Scientist, and it reflects my interest in applying data analysis to real-world problems.
 
-📫 Puedes contactarme por [LinkedIn](https://linkedin.com/in/miguel-soler-ml) o ver más proyectos en [GitHub](https://github.com/Miguel9Angel).
+📫 You can contact me on [LinkedIn](https://linkedin.com/in/miguel-soler-ml) or explore more projects on [GitHub](https://github.com/Miguel9Angel).
