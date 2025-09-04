@@ -2,7 +2,7 @@
 
 ![preview](./assets/BestModelRandSearchCost_Accuracy.png)
 
-This porject goal is to make a general neural network with some of the most important configurations to understand the basic of functionality of a neural network. Test it with different data sets and track it's performance with differents hyperparameters
+This project goal is to make a general neural network with some of the most important configurations to understand the basic of functionality of a neural network. Test it with different data sets and track it's performance with differents hyperparameters
 
 ## 📊 Dataset
 
